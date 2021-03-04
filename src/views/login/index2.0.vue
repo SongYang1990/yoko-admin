@@ -41,13 +41,10 @@
     </div>
 </template>
 <script>
-import {onMounted, reactive, ref} from '@vue/composition-api'
 import { regEmail, regPassword, regCode, regCharacters} from '@/utils/validate'
 export default {
     name: "login",
-    // vue3.0特性，里面放置data数据、生命周期、自定义函数等
-    // setup(props, context) {
-    setup(props, {refs}) {
+    data(){
         // 校验用户名
         var validateUsername = (rule, value, callback) => {
             if (!value || regEmail(value)) {
@@ -64,10 +61,10 @@ export default {
         };
          // 校验重复密码
         var validatePwds = (rule, value, callback) => {
-            if (model.value === 'login') {
+            if (this.model === 'login') {
                 callback();
             }
-            if(!value || value != ruleForm.password) {
+            if(value != this.ruleForm.password) {
                 callback(new Error('重复密码与密码不符'));
             }
             callback();
@@ -79,77 +76,63 @@ export default {
             }
             callback();
         };
-
-        /**
-         * 声明对象： reactive声明单一对象
-         */
-        const menuTab = reactive([
-            {txt: '登录', current: true, type: 'login'},
-            {txt: '注册', current: false, type: 'register'}
-        ])
-        // 表单绑定数据
-        const ruleForm = reactive({
-            username: '',
-            password: '',
-            passwords: '',
-            code: ''
-        }) 
-        // 表单校验数据
-        const rules = reactive({
-            username: [
-                { validator: validateUsername, trigger: 'blur' }
+        // vue 数据驱动视频渲染，JS 操作DOM元素
+        return {
+           menuTab: [
+                {txt: '登录', current: true, type: 'login'},
+                {txt: '注册', current: false, type: 'register'}
             ],
-            password: [
-                { validator: validatePwd, trigger: 'blur' }
-            ],
-            passwords: [
-                { validator: validatePwds, trigger: 'blur' }
-            ],
-            code: [
-                { validator: validateCode, trigger: 'blur' }
-            ]
-        })
+            // 模块值
+            model: 'login',
 
-        /**
-         * 声明变量：ref声明基础类型变量
-         */
-        const model = ref('login')
+            ruleForm: {
+                username: '',
+                password: '',
+                passwords: '',
+                code: ''
+            },
 
-        /**
-         * 声明函数
-         */
-        const toggleMneu = (data => {
-            menuTab.forEach(ele => {
+            rules: {
+                username: [
+                    { validator: validateUsername, trigger: 'blur' }
+                ],
+                password: [
+                    { validator: validatePwd, trigger: 'blur' }
+                ],
+                passwords: [
+                    { validator: validatePwds, trigger: 'blur' }
+                ],
+                code: [
+                    { validator: validateCode, trigger: 'blur' }
+                ]
+            }
+        }
+    },
+    // 生命周期之一：创建完成时自动执行
+    created(){},
+    // 生命周期之一：挂载完成时后自动执行
+    mounted(){
+    
+    },
+    // 函数区
+    methods: {
+        toggleMneu(data) {
+            this.menuTab.forEach(ele => {
                 ele.current = false
             });
             data.current = true
             // 修改模块值
-            model.value = data.type
-        })
-        const submitForm = (formName => {
-            refs[formName].validate((valid) => {
+            this.model = data.type
+        },
+        submitForm(formName) {
+            this.$refs[formName].validate((valid) => {
                 if (valid) {
                     alert('submit!');
                 } else {
                     console.log('error submit!!');
                     return false;
                 }
-            })
-        })
-        
-
-        // 声明周期-挂载完成后执行
-        onMounted(() => {
-            // console.log("声明周期-挂载完成后执行")
-        })
-
-        return {
-            menuTab,
-            model,
-            toggleMneu,
-            submitForm,
-            ruleForm,
-            rules
+            });
         }
     }
 }
